@@ -4,7 +4,7 @@ from openslide import OpenSlide, OpenSlideUnsupportedFormatError
 from PIL import Image
 import contour_utils as wsi_contour_utils
 
-os.chdir('/Users/pallavgarg/Downloads/Ground_Truth_Extracted/Mask/')
+os.chdir('/Users/anuragverma/Downloads/Ground_Truth_Extracted/Mask/')
 
 # Resolution level at which slide should be read
 resolution_level = 5

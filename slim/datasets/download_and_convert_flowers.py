@@ -31,7 +31,7 @@ import math
 import os
 import random
 import sys
-
+import platform
 import tensorflow as tf
 
 from datasets import dataset_utils
@@ -138,9 +138,12 @@ def _convert_dataset(split_name, filenames, class_names_to_ids, dataset_dir):
             # Read the filename:
             image_data = tf.gfile.FastGFile(filenames[i], 'rb').read()
             height, width = image_reader.read_image_dims(sess, image_data)
+            print("\n\nImage dimensions, height : {0} , width : {1}".format(height, width))
 
             class_name = os.path.basename(os.path.dirname(filenames[i]))
+            print("class_name ",class_name)
             class_id = class_names_to_ids[class_name]
+            print("class_id ", class_id)
 
             example = dataset_utils.image_to_tfexample(
                 image_data, b'jpg', height, width, class_id)
@@ -180,32 +183,44 @@ def run(dataset_dir):
   Args:
     dataset_dir: The dataset directory where the dataset is stored.
   """
-  if not tf.gfile.Exists(dataset_dir):
-    tf.gfile.MakeDirs(dataset_dir)
-
-  if _dataset_exists(dataset_dir):
-    print('Dataset files already exist. Exiting without re-creating them.')
-    return
-
-  dataset_utils.download_and_uncompress_tarball(_DATA_URL, dataset_dir)
+  # if not tf.gfile.Exists(dataset_dir):
+  #   tf.gfile.MakeDirs(dataset_dir)
+  #
+  # if _dataset_exists(dataset_dir):
+  #   print('Dataset files already exist. Exiting without re-creating them.')
+  #   return
+  #
+  # dataset_utils.download_and_uncompress_tarball(_DATA_URL, dataset_dir)
   photo_filenames, class_names = _get_filenames_and_classes(dataset_dir)
   class_names_to_ids = dict(zip(class_names, range(len(class_names))))
-
+  print("\n\n",photo_filenames,"\n\n")
+  print(class_names_to_ids)
   # Divide into train and test:
   random.seed(_RANDOM_SEED)
   random.shuffle(photo_filenames)
   training_filenames = photo_filenames[_NUM_VALIDATION:]
   validation_filenames = photo_filenames[:_NUM_VALIDATION]
 
-  # First, convert the training and validation sets.
-  _convert_dataset('train', training_filenames, class_names_to_ids,
-                   dataset_dir)
-  _convert_dataset('validation', validation_filenames, class_names_to_ids,
-                   dataset_dir)
-
-  # Finally, write the labels file:
+  #First, convert the training and validation sets.
+  # _convert_dataset('train', training_filenames, class_names_to_ids,
+  #                  dataset_dir)
+  # _convert_dataset('validation', validation_filenames, class_names_to_ids,
+  #                  dataset_dir)
+  #
+  # # Finally, write the labels file:
   labels_to_class_names = dict(zip(range(len(class_names)), class_names))
   dataset_utils.write_label_file(labels_to_class_names, dataset_dir)
+  #
+  # _clean_up_temporary_files(dataset_dir)
+  # print('\nFinished converting the Flowers dataset!')
 
-  _clean_up_temporary_files(dataset_dir)
-  print('\nFinished converting the Flowers dataset!')
+
+def main(unused_argv):
+    if platform.system() == 'Linux':
+      dataset_dir = "/home/anurag/Desktop/tensorflow_data"
+    else:
+      dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
+    run(dataset_dir)
+
+if __name__ == "__main__":
+  tf.app.run()

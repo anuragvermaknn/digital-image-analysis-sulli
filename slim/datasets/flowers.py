@@ -23,8 +23,9 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import platform
 import tensorflow as tf
-
+import tensorflow.contrib.slim.python.slim.data.dataset_data_provider as dataset_data_provider
 from datasets import dataset_utils
 
 slim = tf.contrib.slim
@@ -96,3 +97,27 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
       items_to_descriptions=_ITEMS_TO_DESCRIPTIONS,
       num_classes=_NUM_CLASSES,
       labels_to_names=labels_to_names)
+
+
+def main(unused_argv):
+    if platform.system() == 'Linux':
+      dataset_dir = "/home/anurag/Desktop/tensorflow_data"
+    else:
+      dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
+
+    #dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
+    dataset = get_split('train',dataset_dir)
+    dataset_provider = dataset_data_provider.DatasetDataProvider(dataset,
+                                                        num_readers=12,
+                                                        shuffle=False
+                                                        )
+    #images, labels = dataset_provider.get(['image', 'label'])
+    [labels] = dataset_provider.get(['label'])
+    with tf.Session() as sess:
+        print(sess.run([labels]))
+
+    #print([labels])
+    #print(type(images))
+
+if __name__ == "__main__":
+    tf.app.run()
