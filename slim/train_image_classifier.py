@@ -222,12 +222,17 @@ FLAGS = tf.app.flags.FLAGS
 from properties import disk_storage
 
 flags = tf.app.flags
+
+############################################ IMPORTANT FLAGS ###################################################
+
 #State your dataset directory
-flags.DEFINE_string('dataset_dir', disk_storage.LYMPH_DATA_DIR , 'String: Your dataset directory')
+#flags.DEFINE_string('dataset_dir', disk_storage.LYMPH_DATA_DIR , 'String: Your dataset directory')
+flags.DEFINE_string('dataset_dir', "~/Desktop/tensorflow_data/" , 'String: Your dataset directory')
 
 flags.DEFINE_string('train_dir', disk_storage.TRAIN_LOGS_DIR , 'Directory where checkpoints and event logs are written to.')
 
-flags.DEFINE_string('dataset_name', "lymph" , 'String: Your dataset directory')
+#flags.DEFINE_string('dataset_name', "lymph" , 'String: Your dataset directory')
+flags.DEFINE_string('dataset_name', "flowers" , 'String: Your dataset directory')
 
 flags.DEFINE_string('dataset_split_name', 'train' , 'String: Your dataset directory')
 
@@ -235,6 +240,8 @@ flags.DEFINE_string('model_name', 'inception_v3' , 'String: Your dataset directo
 
 tf.app.flags.DEFINE_integer(
     'train_image_size', 256, 'Train image size')
+
+
 
 def _configure_learning_rate(num_samples_per_epoch, global_step):
   """Configures the learning rate.

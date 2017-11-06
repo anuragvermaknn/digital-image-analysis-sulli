@@ -27,6 +27,8 @@ import platform
 import tensorflow as tf
 import tensorflow.contrib.slim.python.slim.data.dataset_data_provider as dataset_data_provider
 from datasets import dataset_utils
+from PIL import Image
+import numpy as np
 
 slim = tf.contrib.slim
 
@@ -105,16 +107,33 @@ def main(unused_argv):
     else:
       dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
 
-    #dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
-    dataset = get_split('train',dataset_dir)
+    dataset = get_split('train', dataset_dir)
     dataset_provider = dataset_data_provider.DatasetDataProvider(dataset,
-                                                        num_readers=12,
-                                                        shuffle=False
-                                                        )
-    #images, labels = dataset_provider.get(['image', 'label'])
-    [labels] = dataset_provider.get(['label'])
+                                                                 num_readers=12,
+                                                                 shuffle=False
+                                                                 )
+
     with tf.Session() as sess:
-        print(sess.run([labels]))
+        #dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
+        tf.train.start_queue_runners()
+        [image_raw, label] = dataset_provider.get(['image', 'label'])
+        #image_decoded = tf.image.decode_jpeg(image_raw)
+        image_raw, label = sess.run([image_raw, label])
+        print(label)
+        print(image_raw.shape)
+        Image.fromarray(np.array(image_raw)).show()
+        #print(image_decoded.shape)
+        #print(image_decoded)
+        #print("\n\n\n\n",image_raw)
+
+        #images, labels = dataset_provider.get(['image', 'label'])
+        # for i in range(dataset_provider.num_samples()):
+        #     [image_raw, label] = dataset_provider.get(['image','label'])
+        #     labels = sess.run([label])
+        #     image_ra = tf.image.
+        #
+        #     for j in range(len(labels)):
+        #         print("label = {}".format(labels[j]))
 
     #print([labels])
     #print(type(images))
