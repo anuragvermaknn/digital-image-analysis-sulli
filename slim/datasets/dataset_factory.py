@@ -22,13 +22,13 @@ from datasets import cifar10
 from datasets import flowers
 from datasets import imagenet
 from datasets import mnist
-from datasets import lymph_biopsy
+from datasets import lymph_nodes
 datasets_map = {
     'cifar10': cifar10,
     'flowers': flowers,
     'imagenet': imagenet,
     'mnist': mnist,
-    'lymph': lymph_biopsy,
+    'lymph_nodes': lymph_nodes,
 }
 
 

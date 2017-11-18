@@ -25,6 +25,8 @@ from deployment import model_deploy
 from nets import nets_factory
 from preprocessing import preprocessing_factory
 
+from properties import wsi_props, training_params
+
 slim = tf.contrib.slim
 
 tf.app.flags.DEFINE_string(
@@ -64,7 +66,7 @@ tf.app.flags.DEFINE_integer(
     'The frequency with which summaries are saved, in seconds.')
 
 tf.app.flags.DEFINE_integer(
-    'save_interval_secs', 600,
+    'save_interval_secs', 3600,
     'The frequency with which the model is saved, in seconds.')
 
 tf.app.flags.DEFINE_integer(
@@ -226,20 +228,20 @@ flags = tf.app.flags
 ############################################ IMPORTANT FLAGS ###################################################
 
 #State your dataset directory
-#flags.DEFINE_string('dataset_dir', disk_storage.LYMPH_DATA_DIR , 'String: Your dataset directory')
-flags.DEFINE_string('dataset_dir', "~/Desktop/tensorflow_data/" , 'String: Your dataset directory')
+flags.DEFINE_string('dataset_dir', disk_storage.PATCHES_TF_RECORD_DIR , 'String: Your dataset directory')
+#flags.DEFINE_string('dataset_dir', "~/Desktop/tensorflow_data/" , 'String: Your dataset directory')
 
 flags.DEFINE_string('train_dir', disk_storage.TRAIN_LOGS_DIR , 'Directory where checkpoints and event logs are written to.')
 
 #flags.DEFINE_string('dataset_name', "lymph" , 'String: Your dataset directory')
-flags.DEFINE_string('dataset_name', "flowers" , 'String: Your dataset directory')
+flags.DEFINE_string('dataset_name', wsi_props.DATASET_NAME, 'String: Your dataset directory')
 
 flags.DEFINE_string('dataset_split_name', 'train' , 'String: Your dataset directory')
 
 flags.DEFINE_string('model_name', 'inception_v3' , 'String: Your dataset directory')
 
 tf.app.flags.DEFINE_integer(
-    'train_image_size', 256, 'Train image size')
+    'train_image_size', wsi_props.PATCH_SIZE, 'Train image size')
 
 
 

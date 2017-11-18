@@ -1,5 +1,5 @@
 import tensorflow as tf
-from datasets import lymph_biopsy
+from datasets import lymph_nodes
 from properties import disk_storage
 import train_image_classifier
 
@@ -28,7 +28,7 @@ FLAGS = flags.FLAGS
 
 
 # Selects the 'validation' dataset.
-dataset = lymph_biopsy.get_split('validation', disk_storage.LYMPH_DATA_DIR)
+dataset = lymph_nodes.get_split('validation', disk_storage.LYMPH_DATA_DIR)
 
 # Creates a TF-Slim DataProvider which reads the dataset in the background
 # during both training and testing.

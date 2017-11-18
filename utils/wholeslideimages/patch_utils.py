@@ -23,18 +23,18 @@ import contour_utils
 # In a good sample, the patch square box should
 # cover tumor region mostly. Hence, only less number of
 # pixels should lie outside the contour of tumors in mask path
-def criteria_for_patch_selection_in_tumor_images(patch_read_from_mask_at_zero_level):   # corresponding patch from mask
+def criteria_for_tumor_patch_selection_in_tumor_images(patch_read_from_mask_at_zero_level):   # corresponding patch from mask
 
     grayscale_image = contour_utils.get_grayscale_image_from_rgb(patch_read_from_mask_at_zero_level)
     count_tumor_pxls_in_patch_section = cv2.countNonZero(np.array(grayscale_image)) * 1.0
 
     total_pxls_in_square_box = wsi_props.PATCH_SAMPLE_BOX_SIZE * wsi_props.PATCH_SAMPLE_BOX_SIZE
     ratio_tumor_pxls_in_patch_section  =  count_tumor_pxls_in_patch_section/ total_pxls_in_square_box
-    print "ratio_tumor_pxls_in_patch_section : {0:.2%}".format(ratio_tumor_pxls_in_patch_section)
+    #print "ratio_tumor_pxls_in_patch_section : {0:.2%}".format(ratio_tumor_pxls_in_patch_section)
 
     if(ratio_tumor_pxls_in_patch_section
         > wsi_props.PATCH_TUMOR_PIXELS_RATIO_THRESHOLD):
-        print "ratio_tumor_pxls_in_patch_section : {0:.2%}".format(ratio_tumor_pxls_in_patch_section)
+        #print "ratio_tumor_pxls_in_patch_section : {0:.2%}".format(ratio_tumor_pxls_in_patch_section)
         return True
     else:
         False
@@ -42,7 +42,7 @@ def criteria_for_patch_selection_in_tumor_images(patch_read_from_mask_at_zero_le
 # In a good sample, the patch square box should contain
 # a lot of red pixels. Hence, only less number of pixels
 # should have non-red hue.
-def criteria_for_patch_selection_in_non_tumor_images(patch_read_from_wsi_at_zero_level):    # patch extracted from wsi original
+def criteria_for_normal_patch_selection_in_non_tumor_images(patch_read_from_wsi_at_zero_level):    # patch extracted from wsi original
 
     hsv = cv2.cvtColor(np.array(patch_read_from_wsi_at_zero_level), cv2.COLOR_BGR2HSV)
     lower_red = np.array([20, 20, 20])
@@ -53,10 +53,10 @@ def criteria_for_patch_selection_in_non_tumor_images(patch_read_from_wsi_at_zero
     count_red_pixels_in_patch = cv2.countNonZero(np.array(red_mask_on_hsv)) * 1.0
     total_pxls_in_square_box = wsi_props.PATCH_SAMPLE_BOX_SIZE * wsi_props.PATCH_SAMPLE_BOX_SIZE
     ratio_red_pxls_in_patch_section = count_red_pixels_in_patch/ total_pxls_in_square_box
-
+    #print "ratio_red_pxls_in_patch_section : ",ratio_red_pxls_in_patch_section
     if( ratio_red_pxls_in_patch_section
         > wsi_props.PATCH_NON_TUMOR_RED_PIXELS_RATIO_THRESHOLD):
-        print "ratio_red_pxls_in_patch_section : {0:.2%}".format(ratio_red_pxls_in_patch_section)
+        #print "ratio_red_pxls_in_patch_section : {0:.2%}".format(ratio_red_pxls_in_patch_section)
         return True
     else:
         return False
