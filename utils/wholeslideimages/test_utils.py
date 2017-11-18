@@ -42,11 +42,11 @@ tumor_mask = wsi_mask.read_region((0, 0), mask_resolution_level, wsi_mask.level_
 #                                                                      patch_resolution_level=mask_resolution_level-mask_resolution_level+1)
 
 # below api is working great
-wsi_contour_utils.get_and_save_patch_samples_for_non_tumor_images(mask_image_resolution_level=mask_resolution_level,
-                                                                  wsi_path=normal_wsi_path)
+wsi_contour_utils.get_and_save_normal_patch_samples_from_both_images(mask_image_resolution_level=mask_resolution_level,
+                                                                     wsi_path=normal_wsi_path, wsi_mask_path=None)
 
 # below api is working great
-wsi_contour_utils.get_and_save_patch_samples_for_tumor_images(mask_image=tumor_mask,
-                                                              mask_image_resolution_level=mask_resolution_level,
-                                                              wsi_path=tumor_wsi_path,
-                                                              wsi_mask_path=wsi_mask_path)
+wsi_contour_utils.get_and_save_tumor_patch_samples_for_tumor_images(mask_image=tumor_mask,
+                                                                    mask_image_resolution_level=mask_resolution_level,
+                                                                    wsi_path=tumor_wsi_path,
+                                                                    wsi_mask_path=wsi_mask_path)

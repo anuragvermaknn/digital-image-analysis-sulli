@@ -23,34 +23,26 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import platform
 import tensorflow as tf
+from PIL import Image
+import numpy as np
 
 from datasets import dataset_utils
+import tensorflow.contrib.slim.python.slim.data.dataset_data_provider as dataset_data_provider
 
+from properties import training_params
+from properties import disk_storage as disk_storage_props
 slim = tf.contrib.slim
 
 flags = tf.app.flags
 
-#State your dataset directory
-#flags.DEFINE_string('dataset_dir',disk_storage_utils.LYMPH_DATA_DIR , 'String: Your dataset directory')
-
-# The number of images in the validation set. You would have to know the total number of examples in advance. This is essentially your evaluation dataset.
-flags.DEFINE_float('validation_size', 0.3, 'Float: The proportion of examples in the dataset to be used for validation')
-
-# The number of shards to split the dataset into
-flags.DEFINE_integer('num_shards', 2, 'Int: Number of shards to split the TFRecord files')
-
-# Seed for repeatability.
-flags.DEFINE_integer('random_seed', 0, 'Int: Random seed to use for repeatability.')
-
-#Output filename for the naming the TFRecord file
-flags.DEFINE_string('tfrecord_filename', 'wsi_%s_*.tfrecord', 'String: The output filename to name your TFRecord file')
-
 FLAGS = flags.FLAGS
 
-_FILE_PATTERN = 'wsi_%s_*.tfrecord' #'flowers_%s_*.tfrecord'
+_FILE_PATTERN = 'lymph_nodes_%s_*.tfrecord' #'flowers_%s_*.tfrecord'
 
-SPLITS_TO_SIZES = {'train': 4, 'validation': 1}
+SPLITS_TO_SIZES = {'train': training_params.PATCHES_TRAIN_SAMPLES,
+                   'validation': training_params.PATCHES_VALIDATION_SAMPLES}
 
 _NUM_CLASSES = 2
 
@@ -116,3 +108,46 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
       items_to_descriptions=_ITEMS_TO_DESCRIPTIONS,
       num_classes=_NUM_CLASSES,
       labels_to_names=labels_to_names)
+
+
+
+def main(unused_argv):
+    # if platform.system() == 'Linux':
+    #   dataset_dir = "/home/anurag/Desktop/tensorflow_data"
+    # else:
+    #   dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
+
+    dataset_dir = disk_storage_props.PATCHES_TRAIN_DATA_DIR
+    tf_record_dir = disk_storage_props.PATCHES_TF_RECORD_DIR
+
+    dataset = get_split('train', tf_record_dir)
+    dataset_provider = dataset_data_provider.DatasetDataProvider(dataset,
+                                                                 num_readers=12,
+                                                                 shuffle=False
+                                                                 )
+
+    with tf.Session() as sess:
+        #dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
+        tf.train.start_queue_runners()
+        [image_raw, label] = dataset_provider.get(['image', 'label'])
+        #image_decoded = tf.image.decode_jpeg(image_raw)
+        image_raw, label = sess.run([image_raw, label])
+        print(label)
+        print(image_raw.shape)
+        #Image.fromarray(np.array(image_raw)).show()
+        #print(image_decoded.shape)
+        #print(image_decoded)
+        #print("\n\n\n\n",image_raw)
+        print (dataset_provider.num_samples())
+        #images, labels = dataset_provider.get(['image', 'label'])
+        for i in range(dataset_provider.num_samples()):
+            [image_raw, label] = dataset_provider.get(['image','label'])
+            image_raw, label = sess.run([image_raw, label])
+            if label == 0:
+                Image.fromarray(np.array(image_raw)).show()
+
+    #print([labels])
+    #print(type(images))
+
+if __name__ == "__main__":
+    tf.app.run()

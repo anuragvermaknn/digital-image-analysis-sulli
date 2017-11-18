@@ -1,4 +1,5 @@
 utils/wholeslideimages/data/
+sftp-config.json
 *.DS_Store
 .DS_Store
 
