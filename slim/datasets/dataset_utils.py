@@ -76,6 +76,16 @@ def image_to_tfexample(image_data, image_format, height, width, class_id):
       'image/width': int64_feature(width),
   }))
 
+# Serialize the file name also
+def image_to_tfexample_with_filename(image_data, image_format, height, width, class_id, filename):
+  return tf.train.Example(features=tf.train.Features(feature={
+      'image/encoded': bytes_feature(image_data),
+      'image/format': bytes_feature(image_format),
+      'image/class/label': int64_feature(class_id),
+      'image/height': int64_feature(height),
+      'image/width': int64_feature(width),
+      'image/filename': bytes_feature(filename),
+  }))
 
 def download_and_uncompress_tarball(tarball_url, dataset_dir):
   """Downloads the `tarball_url` and uncompresses it locally.

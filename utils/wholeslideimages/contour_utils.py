@@ -49,7 +49,7 @@ def get_bbox_from_contours(contours):
 
 # get a list of bounding boxes which encloses
 # all the contours in a RGB image
-def get_bbox_from_mask_image(mask_image):
+def  get_bbox_from_mask_image(mask_image):
 
     grayscale_image = get_grayscale_image_from_rgb(mask_image)
     contours = get_external_contours_from_grayscale_image(grayscale_image)
@@ -74,6 +74,69 @@ def get_random_samples_of_patch_starting_points(mask_image):
         list_starting_points += zip(X, Y)
     return list_starting_points
 
+# random sampling worked poorly,
+# therefore generating samples at stride 10
+def get_samples_of_patch_starting_points_with_stride_10(mask_image):
+
+    bounding_boxes = get_bbox_from_mask_image(mask_image)
+    list_starting_points = []
+    for x, y, w, h in bounding_boxes:
+        #print x, y, w, h
+        #print " x, y, w, h : {0}, {1}, {2}, {3}".format(x, y, w, h)
+        X = xrange(x, x+w, 10) #np.arange(x, x+w)
+        Y = xrange(y, y+h, 10) #np.arange(y, y+h)
+
+        for row_starting_point in X:
+            for col_starting_point in Y:
+                # append in the list
+                list_starting_points.append((row_starting_point, col_starting_point))
+
+    return list_starting_points
+# for tumor samples
+def get_samples_of_patch_starting_points_with_stride_2(mask_image):
+
+    bounding_boxes = get_bbox_from_mask_image(mask_image)
+    list_starting_points = []
+    for x, y, w, h in bounding_boxes:
+        #print x, y, w, h
+        #print " x, y, w, h : {0}, {1}, {2}, {3}".format(x, y, w, h)
+        X = xrange(x, x+w, 2) #np.arange(x, x+w)
+        Y = xrange(y, y+h, 2) #np.arange(y, y+h)
+
+        for row_starting_point in X:
+            for col_starting_point in Y:
+                # append in the list
+                list_starting_points.append((row_starting_point, col_starting_point))
+
+    return list_starting_points
+
+# for evaluation/postprocessing
+def get_consecutive_samples_of_patch_starting_points_and_image_with_bbox(mask_image, rgb_image = None):
+    return get_consecutive_samples_of_patch_starting_points_and_image_with_bbox_with_stride(mask_image=mask_image,
+                                                                                            stride=1,
+                                                                                            rgb_image=rgb_image)
+# for evaluation/postprocessing
+def get_consecutive_samples_of_patch_starting_points_and_image_with_bbox_with_stride(mask_image, stride=1, rgb_image = None):
+
+    bounding_boxes = get_bbox_from_mask_image(mask_image)
+    list_starting_points = []
+    for x, y, w, h in bounding_boxes:
+        #print x, y, w, h
+        #print " x, y, w, h : {0}, {1}, {2}, {3}".format(x, y, w, h)
+        X = np.arange(x, x+w, stride)
+        Y = np.arange(y, y+h, stride)
+
+        for row_starting_point in X:
+            for col_starting_point in Y:
+                # append in the list
+                list_starting_points.append((row_starting_point, col_starting_point))
+
+        if rgb_image is not None:
+            cv2.rectangle(rgb_image, (x, y), (x + w, y + h), (255, 255, 255), 5)
+
+    return list_starting_points, rgb_image
+
+
 def get_saturation_thresholded_mask_from_non_tumor_wsi(non_tumor_wsi):
 
     rgb_image = np.array(non_tumor_wsi)
@@ -87,6 +150,19 @@ def get_saturation_thresholded_mask_from_non_tumor_wsi(non_tumor_wsi):
     #print ret2, type(saturation_thresholded_mask2)
     saturation_thresholded_mask_rgb = cv2.cvtColor(saturation_thresholded_mask, cv2.COLOR_GRAY2BGR)
     return saturation_thresholded_mask_rgb
+
+def get_saturation_thresholded_mask_from_non_tumor_wsi_grayscale(non_tumor_wsi):
+
+    rgb_image = np.array(non_tumor_wsi)
+    hsv_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv_image)
+
+    s2 = cv2.medianBlur(s, 25)
+    ret, saturation_thresholded_mask = cv2.threshold(s2, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    #print ret
+    #ret2, saturation_thresholded_mask2 = cv2.threshold(saturation_thresholded_mask, 0, 255, cv2.THRESH_BINARY)
+    #print ret2, type(saturation_thresholded_mask2)
+    return saturation_thresholded_mask
 
 # To get normal patches from tumor images
 # take bitwise AND of the tumor wsi and
@@ -164,7 +240,13 @@ def get_and_save_patch_samples_from_mask_and_wsi_image(mask_image,          # rg
                                               is_tumor_image=True):
     wsi_name = wsi_path.split('/')[-1].split('.')[0]
     # print "Processing Image id : ", wsi_name
-    patch_starting_points = get_random_samples_of_patch_starting_points(mask_image)
+    #patch_starting_points = get_random_samples_of_patch_starting_points(mask_image)
+    # MODIFICATION
+    if is_tumor_image:
+        patch_starting_points = get_samples_of_patch_starting_points_with_stride_2(mask_image)
+    else:
+        patch_starting_points = get_samples_of_patch_starting_points_with_stride_10(mask_image)
+
     #print "patch_starting_points computed"
     if patch_resolution_level is None:
         patch_resolution_level = 0
@@ -181,21 +263,33 @@ def get_and_save_patch_samples_from_mask_and_wsi_image(mask_image,          # rg
     count = 0
     samples_accepted = 0
     samples_rejected = 0
+    quotient = int(len(patch_starting_points)/wsi_props.PATCH_MINIMUM_NO_OF_SAMPLES_OF_BBOX) + 1
     for x,y in patch_starting_points:
 
         if samples_accepted >= wsi_props.PATCH_MINIMUM_NO_OF_SAMPLES_OF_BBOX:
             break
 
+        count += 1
+        if count % quotient != 0:
+            continue
         save_patch = False
         patch_to_be_saved = None
         # For Tumor Images
         if is_tumor_image :
-            patch_read_from_mask_at_zero_level = wsi_mask_original.read_region((x*scaling_factor, y*scaling_factor),
-                                                   0,
-                                                   (wsi_props.PATCH_SAMPLE_BOX_SIZE,wsi_props.PATCH_SAMPLE_BOX_SIZE))
+            # patch_read_from_mask_at_zero_level = wsi_mask_original.read_region((x*scaling_factor, y*scaling_factor),
+            #                                        0,
+            #                                        (wsi_props.PATCH_SAMPLE_BOX_SIZE,wsi_props.PATCH_SAMPLE_BOX_SIZE))
 
             # Is this patch a good sample ?
-            if patch_utils.criteria_for_tumor_patch_selection_in_tumor_images(patch_read_from_mask_at_zero_level):
+
+            # Deprecate earlier criteria
+            #if patch_utils.criteria_for_tumor_patch_selection_in_tumor_images(patch_read_from_mask_at_zero_level):
+
+            # new criteria below
+            # print("about to print pixel value")
+            # print(mask_image[y, x])
+            if (mask_image[y, x][0] != 0):
+
                 save_patch = True
                 patch_to_be_saved = wsi_image_original.read_region(
                     (x * scaling_factor, y * scaling_factor),
@@ -214,7 +308,7 @@ def get_and_save_patch_samples_from_mask_and_wsi_image(mask_image,          # rg
             else:
                 samples_rejected += 1
 
-            patch_read_from_mask_at_zero_level.close()
+            #patch_read_from_mask_at_zero_level.close()
 
         else:
             patch_read_from_wsi_at_zero_level = wsi_image_original.read_region((x*scaling_factor, y*scaling_factor),
@@ -222,7 +316,12 @@ def get_and_save_patch_samples_from_mask_and_wsi_image(mask_image,          # rg
                                                (wsi_props.PATCH_SAMPLE_BOX_SIZE,wsi_props.PATCH_SAMPLE_BOX_SIZE))
 
             # Is this patch a good sample ?
-            if patch_utils.criteria_for_normal_patch_selection_in_non_tumor_images(patch_read_from_wsi_at_zero_level):
+
+            # Deprecate earlier criteria
+            #if patch_utils.criteria_for_normal_patch_selection_in_non_tumor_images(patch_read_from_wsi_at_zero_level):
+
+            # new criteria below
+            if (mask_image[y, x][0] != 0):
                 #print " Criteria satisfied by patch"
                 save_patch=True
                 patch_to_be_saved = patch_read_from_wsi_at_zero_level
@@ -240,7 +339,7 @@ def get_and_save_patch_samples_from_mask_and_wsi_image(mask_image,          # rg
                 #print " Criteria UN-satisfied by patch"
 
 
-        count += 1
+
     wsi_image_original.close()
 
     print " samples_accepted : {0}, \t\t samples_rejected : {1}, \t\t bbox_samples_used : {2}".format(samples_accepted, samples_rejected, count)

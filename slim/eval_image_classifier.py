@@ -24,6 +24,7 @@ import tensorflow as tf
 from datasets import dataset_factory
 from nets import nets_factory
 from preprocessing import preprocessing_factory
+from properties import wsi_props, training_params, disk_storage
 
 slim = tf.contrib.slim
 
@@ -38,25 +39,25 @@ tf.app.flags.DEFINE_string(
     'master', '', 'The address of the TensorFlow master to use.')
 
 tf.app.flags.DEFINE_string(
-    'checkpoint_path', '/tmp/tfmodel/',
+    'checkpoint_path', disk_storage.TRAIN_LOGS_DIR,
     'The directory where the model was written to or an absolute path to a '
     'checkpoint file.')
 
 tf.app.flags.DEFINE_string(
-    'eval_dir', '/tmp/tfmodel/', 'Directory where the results are saved to.')
+    'eval_dir', disk_storage.EVAL_LOGS_DIR, 'Directory where the results are saved to.')
 
 tf.app.flags.DEFINE_integer(
     'num_preprocessing_threads', 4,
     'The number of threads used to create the batches.')
 
 tf.app.flags.DEFINE_string(
-    'dataset_name', 'imagenet', 'The name of the dataset to load.')
+    'dataset_name', wsi_props.DATASET_NAME, 'The name of the dataset to load.')
 
 tf.app.flags.DEFINE_string(
-    'dataset_split_name', 'test', 'The name of the train/test split.')
+    'dataset_split_name', 'validation', 'The name of the train/test split.')
 
 tf.app.flags.DEFINE_string(
-    'dataset_dir', None, 'The directory where the dataset files are stored.')
+    'dataset_dir', disk_storage.PATCHES_TF_RECORD_DIR, 'The directory where the dataset files are stored.')
 
 tf.app.flags.DEFINE_integer(
     'labels_offset', 0,
@@ -77,7 +78,7 @@ tf.app.flags.DEFINE_float(
     'If left as None, then moving averages are not used.')
 
 tf.app.flags.DEFINE_integer(
-    'eval_image_size', None, 'Eval image size')
+    'eval_image_size', wsi_props.PATCH_SIZE, 'Eval image size')
 
 FLAGS = tf.app.flags.FLAGS
 

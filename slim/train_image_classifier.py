@@ -25,7 +25,7 @@ from deployment import model_deploy
 from nets import nets_factory
 from preprocessing import preprocessing_factory
 
-from properties import wsi_props, training_params
+from properties import wsi_props, training_params, disk_storage
 
 slim = tf.contrib.slim
 
@@ -123,6 +123,7 @@ tf.app.flags.DEFINE_float('rmsprop_momentum', 0.9, 'Momentum.')
 
 tf.app.flags.DEFINE_float('rmsprop_decay', 0.9, 'Decay term for RMSProp.')
 
+tf.app.flags.DEFINE_float('rmsprop_epsilon', 1.0, 'Epsilon term for RMSProp.')
 #######################
 # Learning Rate Flags #
 #######################
@@ -136,17 +137,18 @@ tf.app.flags.DEFINE_string(
 tf.app.flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
 
 tf.app.flags.DEFINE_float(
-    'end_learning_rate', 0.0001,
+    'end_learning_rate', 0.00001,
     'The minimal end learning rate used by a polynomial decay learning rate.')
 
 tf.app.flags.DEFINE_float(
     'label_smoothing', 0.0, 'The amount of label smoothing.')
 
+# chaning from 0.94 to 0.16
 tf.app.flags.DEFINE_float(
     'learning_rate_decay_factor', 0.94, 'Learning rate decay factor.')
 
 tf.app.flags.DEFINE_float(
-    'num_epochs_per_decay', 2.0,
+    'num_epochs_per_decay', 30.0,
     'Number of epochs after which learning rate decays.')
 
 tf.app.flags.DEFINE_bool(
@@ -221,7 +223,7 @@ tf.app.flags.DEFINE_boolean(
 
 FLAGS = tf.app.flags.FLAGS
 
-from properties import disk_storage
+#from properties import disk_storage
 
 flags = tf.app.flags
 
@@ -236,14 +238,15 @@ flags.DEFINE_string('train_dir', disk_storage.TRAIN_LOGS_DIR , 'Directory where 
 #flags.DEFINE_string('dataset_name', "lymph" , 'String: Your dataset directory')
 flags.DEFINE_string('dataset_name', wsi_props.DATASET_NAME, 'String: Your dataset directory')
 
-flags.DEFINE_string('dataset_split_name', 'train' , 'String: Your dataset directory')
+flags.DEFINE_string('dataset_split_name', 'validation' , 'String: Your dataset directory')
 
 flags.DEFINE_string('model_name', 'inception_v3' , 'String: Your dataset directory')
 
 tf.app.flags.DEFINE_integer(
     'train_image_size', wsi_props.PATCH_SIZE, 'Train image size')
 
-
+# tf.app.flags.DEFINE_integer('num_steps_per_decay', 60000,
+#                             """Steps after which learning rate decays.""")
 
 def _configure_learning_rate(num_samples_per_epoch, global_step):
   """Configures the learning rate.

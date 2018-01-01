@@ -27,7 +27,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import math
+import math, glob, time
 import os
 import random
 import sys
@@ -40,7 +40,7 @@ from properties import disk_storage as disk_storage_props
 _DATA_URL = 'http://download.tensorflow.org/example_images/flower_photos.tgz'
 
 # The ratio of number of images in the validation set.
-_VALIDATION_SIZE = 0.05
+_VALIDATION_SIZE = 0.0
 
 
 # Seed for repeatability.
@@ -49,13 +49,7 @@ _RANDOM_SEED = 0
 # TOTAL PATCH SAMPLES = 289605
 # TRAINING SAMPLES = 231684 AND VALIDATION SAMPLES = 57921
 # The number of shards per dataset split.
-
-# Augmentation
-# TOTAL PATCH SAMPLES = 463823 (347502 Normal + 116321 Tumor)
-# TRAINING SAMPLES = 440632 AND VALIDATION SAMPLES = 23191
-# The number of shards per dataset split.
-
-_NUM_SHARDS = 440
+_NUM_SHARDS = 50
 
 
 class ImageReader(object):
@@ -109,10 +103,9 @@ def _get_filenames_and_classes(dataset_dir):
 
 
 def _get_dataset_filename(dataset_dir, split_name, shard_id):
-  output_filename = 'lymph_nodes_%s_%05d-of-%05d.tfrecord' % (
+  output_filename = 'raw_pathches_%s_%05d-of-%05d.tfrecord' % (
       split_name, shard_id, _NUM_SHARDS)
   return os.path.join(dataset_dir, output_filename)
-
 
 def _convert_dataset(split_name, filenames, class_names_to_ids, dataset_dir):
   """Converts the given filenames to a TFRecord dataset.
@@ -124,7 +117,7 @@ def _convert_dataset(split_name, filenames, class_names_to_ids, dataset_dir):
       (integers).
     dataset_dir: The directory where the converted datasets are stored.
   """
-  assert split_name in ['train', 'validation']
+  assert split_name in ['eval']#['train', 'validation']
 
   num_per_shard = int(math.ceil(len(filenames) / float(_NUM_SHARDS)))
 
@@ -156,8 +149,8 @@ def _convert_dataset(split_name, filenames, class_names_to_ids, dataset_dir):
             class_id = class_names_to_ids[class_name]
             #print("class_id ", class_id)
 
-            example = dataset_utils.image_to_tfexample(
-                image_data, b'jpg', height, width, class_id)
+            example = dataset_utils.image_to_tfexample_with_filename(
+                image_data, b'jpg', height, width, class_id, filenames[i])
             tfrecord_writer.write(example.SerializeToString())
 
   sys.stdout.write('\n')
@@ -179,7 +172,7 @@ def _clean_up_temporary_files(dataset_dir):
 
 
 def _dataset_exists(dataset_dir):
-  for split_name in ['train', 'validation']:
+  for split_name in ['eval']: #['train', 'validation']:
     for shard_id in range(_NUM_SHARDS):
       output_filename = _get_dataset_filename(
           dataset_dir, split_name, shard_id)
@@ -217,10 +210,10 @@ def run(dataset_dir, tf_record_dir):
   validation_filenames = photo_filenames[:num_validation]
 
   #First, convert the training and validation sets.
-  _convert_dataset('train', training_filenames, class_names_to_ids,
+  _convert_dataset('eval', training_filenames, class_names_to_ids,
                    tf_record_dir)
-  _convert_dataset('validation', validation_filenames, class_names_to_ids,
-                   tf_record_dir)
+  # _convert_dataset('validation', validation_filenames, class_names_to_ids,
+  #                  tf_record_dir)
 
   # Finally, write the labels file:
   labels_to_class_names = dict(zip(range(len(class_names)), class_names))
@@ -236,9 +229,30 @@ def main(unused_argv):
     #   dataset_dir = "/home/anurag/Desktop/tensorflow_data"
     # else:
     #   dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
-    dataset_dir = disk_storage_props.PATCHES_TRAIN_DATA_DIR
-    tf_record_dir = disk_storage_props.PATCHES_TF_RECORD_DIR
-    run(dataset_dir, tf_record_dir)
+    # dataset_dir = disk_storage_props.RAW_PATCHES_DIR_TO_GET_HEATMAPS #disk_storage_props.PATCHES_TRAIN_DATA_DIR
+    # tf_record_dir = disk_storage_props.RAW_PATCHES_TF_RECORD_DIR_TO_GET_HEATMAPS #disk_storage_props.PATCHES_TF_RECORD_DIR
+
+    tumor_wsi_paths = glob.glob(os.path.join(disk_storage_props.RAW_TUMOR_DATA_DIR, '*.tif'))
+    tumor_wsi_paths.sort()
+    start_time = time.time()
+    step = 0
+    for wsi_path in tumor_wsi_paths:
+        step += 1
+        if step == 1:
+          continue
+        wsi_name = wsi_path.split('/')[-1].split('.')[0]
+        if step >= 11 :
+            break
+        dataset_dir = disk_storage_props.WSI_RAW_PATCHES_PARENT_DIR_TO_GET_HEATMAPS.replace("WSI_NAME", wsi_name)
+        tf_record_dir = disk_storage_props.WSI_RAW_PATCHES_TF_RECORD_DIR_TO_GET_HEATMAPS.replace("WSI_NAME", wsi_name)
+        run(dataset_dir, tf_record_dir)
+        
+        duration = time.time() - start_time
+        print('For ', wsi_name, '\t',' converted raw input patches to tf records : %d minutes' % math.ceil(duration/60))
+        start_time = time.time()
+
+    wsi_name = "Tumor_001"
+    #wsi_name = "Normal_001"
 
 if __name__ == "__main__":
   tf.app.run()

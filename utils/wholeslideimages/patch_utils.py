@@ -42,7 +42,8 @@ def criteria_for_tumor_patch_selection_in_tumor_images(patch_read_from_mask_at_z
 # In a good sample, the patch square box should contain
 # a lot of red pixels. Hence, only less number of pixels
 # should have non-red hue.
-def criteria_for_normal_patch_selection_in_non_tumor_images(patch_read_from_wsi_at_zero_level):    # patch extracted from wsi original
+def criteria_for_normal_patch_selection_in_non_tumor_images_with_threshold(patch_read_from_wsi_at_zero_level, # patch extracted from wsi original
+                                                            red_pixels_ratio_threshold):
 
     hsv = cv2.cvtColor(np.array(patch_read_from_wsi_at_zero_level), cv2.COLOR_BGR2HSV)
     lower_red = np.array([20, 20, 20])
@@ -55,13 +56,19 @@ def criteria_for_normal_patch_selection_in_non_tumor_images(patch_read_from_wsi_
     ratio_red_pxls_in_patch_section = count_red_pixels_in_patch/ total_pxls_in_square_box
     #print "ratio_red_pxls_in_patch_section : ",ratio_red_pxls_in_patch_section
     if( ratio_red_pxls_in_patch_section
-        > wsi_props.PATCH_NON_TUMOR_RED_PIXELS_RATIO_THRESHOLD):
+        > red_pixels_ratio_threshold):
         #print "ratio_red_pxls_in_patch_section : {0:.2%}".format(ratio_red_pxls_in_patch_section)
         return True
     else:
         return False
 
+# wsi_props.PATCH_NON_TUMOR_RED_PIXELS_RATIO_THRESHOLD
 
+# In a good sample, the patch square box should contain
+# a lot of red pixels. Hence, only less number of pixels
+# should have non-red hue.
+def criteria_for_normal_patch_selection_in_non_tumor_images(patch_read_from_wsi_at_zero_level):    # patch extracted from wsi original
 
-
+    return criteria_for_normal_patch_selection_in_non_tumor_images(patch_read_from_wsi_at_zero_level=patch_read_from_wsi_at_zero_level,
+                                                                   red_pixels_ratio_threshold=wsi_props.PATCH_NON_TUMOR_RED_PIXELS_RATIO_THRESHOLD)
 
