@@ -232,10 +232,6 @@ def run(dataset_dir, tf_record_dir):
 
 def main(unused_argv):
 
-    # if platform.system() == 'Linux':
-    #   dataset_dir = "/home/anurag/Desktop/tensorflow_data"
-    # else:
-    #   dataset_dir = "/Users/anuragverma/Desktop/tensorflow_data"
     dataset_dir = disk_storage_props.PATCHES_TRAIN_DATA_DIR
     tf_record_dir = disk_storage_props.PATCHES_TF_RECORD_DIR
     run(dataset_dir, tf_record_dir)

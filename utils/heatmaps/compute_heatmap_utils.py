@@ -83,7 +83,7 @@ def annotate_heatmap_probabilities_array_with_original_mask(heatmap_probabilitie
     # for x, y, w, h in bounding_boxes:
     #     cv2.rectangle(rgb_contour, (x, y), (x + w, y + h), (255, 255, 255), 5)
 
-    return rgb_contour
+    return rgb_contour, mask_image
 
 def clean_heatmap_using_morph_ops(heatmap_filepath):
 

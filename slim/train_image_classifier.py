@@ -143,7 +143,6 @@ tf.app.flags.DEFINE_float(
 tf.app.flags.DEFINE_float(
     'label_smoothing', 0.0, 'The amount of label smoothing.')
 
-# chaning from 0.94 to 0.16
 tf.app.flags.DEFINE_float(
     'learning_rate_decay_factor', 0.94, 'Learning rate decay factor.')
 

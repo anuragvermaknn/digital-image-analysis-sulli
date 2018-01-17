@@ -87,12 +87,16 @@ def get_and_save_consecutive_patches_from_both_images(wsi,
             patch_to_be_saved.save(fp=filepath_for_current_patch_for_given_wsi)
             patch_to_be_saved.close()
             #print " saturation_thresholded_mask_grayscale value : {}".format(saturation_thresholded_mask_grayscale[y,x])
-            cv2.rectangle(rgb_contour, (x, y), (x + 1, y + 1), (255, 255, 255), 5)
+            cv2.rectangle(rgb_contour, (x, y), (x + 1, y + 1), (255, 255, 255), 1)
             samples_accepted += 1
         else :
             samples_rejected += 1
 
     print " samples_accepted : {0}, \t\t samples_rejected : {1}".format(samples_accepted, samples_rejected)
+
+    dir_for_heatmap_patches_review = disk_storage_props.HEATMAP_REVIEW_DIR
+    if not (os.path.isdir(dir_for_heatmap_patches_review)):
+        os.makedirs(dir_for_heatmap_patches_review)
 
     # For Review : bbox starting points actually accepted
     bbox_accepted_review_filepath = disk_storage_props.WSI_REVIEW_FILE_FOR_BBOX_ACCEPTED_TO_GET_INPUT_FOR_HEATMAP.replace(

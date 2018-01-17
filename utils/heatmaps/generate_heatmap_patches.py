@@ -103,16 +103,17 @@ def get_and_save_consecutive_patch_samples_from_both_images_to_get_heatmaps():
         # Put the tasks into the queue as a tuple
         for wsi_path in tumor_wsi_paths:
             step += 1
-            if step == 1:
+            if step == 0:
                 continue
             wsi_name = wsi_path.split('/')[-1].split('.')[0]
-            if step >= 11:
-                break
             queue.put((mask_image_resolution_level, wsi_path, patch_resolution_level))
             
             duration = time.time() - start_time
             start_time = time.time()
             print('For ', wsi_name, '\t',' raw input patches generated : %d minutes' % math.ceil(duration / 60))
+
+            if step >= 2:
+                break
 
         # Causes the main thread to wait for the queue to finish processing all the tasks
         queue.join()

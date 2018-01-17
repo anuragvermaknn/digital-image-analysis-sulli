@@ -451,7 +451,7 @@ def evaluate_for_a_wsi(wsi_name,
     heatmap_probabilities_array_image = np.array(heatmap_probabilities_array)*255
     #print(heatmap_probabilities_array_image)
     if wsi_mask_name is not None:
-        heatmap_with_actual_mask = compute_heatmap_utils.\
+        heatmap_with_actual_mask, actual_mask_image = compute_heatmap_utils.\
             annotate_heatmap_probabilities_array_with_original_mask(
             heatmap_probabilities_array_image=heatmap_probabilities_array,
             wsi_mask_path=wsi_mask_path,
@@ -461,12 +461,30 @@ def evaluate_for_a_wsi(wsi_name,
         heatmap_with_actual_mask_filepath = disk_storage_props.WSI_HEATMAP_WITH_ACTUAL_MASK_OUPUT_FILE.replace("WSI_NAME", wsi_name)
         cv2.imwrite(heatmap_with_actual_mask_filepath, x)
 
+        # save cleaned heatmap with actual mask for review
+        heatmap_cleaned_with_actual_mask = np.concatenate((cleaned_1, heatmap_with_actual_mask), axis=1)
+        heatmap_cleaned_with_actual_mask_filepath = disk_storage_props.WSI_HEATMAP_CLEANED_FILE_WITH_ACTUAL_MASK.replace("WSI_NAME", wsi_name)
+        cv2.imwrite(heatmap_cleaned_with_actual_mask_filepath, heatmap_cleaned_with_actual_mask)
+
+        # save combined 1. heatmap 2. cleaned_heatmap 3. actual mask
+        a = np.concatenate((heatmap_probabilities_array*255, cleaned_1), axis=1)
+        heatmap_with_cleaned_heatmap_with_actual_mask = np.concatenate((a, heatmap_with_actual_mask), axis=1)
+        heatmap_with_cleaned_heatmap_with_actual_mask_filepath = disk_storage_props.WSI_HEATMAP_WITH_CLEANED_HEATMAP_WITH_ACTUAL_MASK.replace(
+            "WSI_NAME", wsi_name)
+        cv2.imwrite(heatmap_with_cleaned_heatmap_with_actual_mask_filepath, heatmap_with_cleaned_heatmap_with_actual_mask)
         # add mask to cleaned heatmaps also for review
-        cleaned_1 = np.concatenate((cleaned_1, heatmap_with_actual_mask), axis=1)
-        cleaned_2 = np.concatenate((cleaned_2, heatmap_with_actual_mask), axis=1)
+        #cleaned_1 = np.concatenate((cleaned_1, heatmap_with_actual_mask), axis=1)
+        #cleaned_2 = np.concatenate((cleaned_2, heatmap_with_actual_mask), axis=1)
+
+
+        # save actual mask for review
+        wsi_actual_mask_filepath = disk_storage_props.WSI_ACTUAL_MASK_OUPUT_FILE.replace(
+            "WSI_NAME", wsi_name)
+        cv2.imwrite(wsi_actual_mask_filepath, actual_mask_image)
 
     cv2.imwrite(heatmap_cleaned_1_filepath, cleaned_1)
-    cv2.imwrite(heatmap_cleaned_2_filepath, cleaned_2)
+    #cv2.imwrite(heatmap_cleaned_2_filepath, cleaned_2)
+
 
         # slim.evaluation.evaluate_once(
     #     master=FLAGS.master,
@@ -490,7 +508,7 @@ def main(_):
     step = 0
     for wsi_path, wsi_mask_path in tumor_image_mask_pairs:
         step += 1
-        if step == 1:
+        if step == 0:
             continue
         wsi_name = wsi_path.split('/')[-1].split('.')[0]
         wsi_mask_name = wsi_mask_path.split('/')[-1].split('.')[0]
@@ -499,7 +517,7 @@ def main(_):
         duration = time.time() - start_time
         print( 'For ', wsi_name, '\t',' evaluated input patches to tf records : %d minutes' % math.ceil(duration/60))
         start_time = time.time()
-        if step >= 11:
+        if step >= 1:
             break
         
 
