@@ -83,7 +83,7 @@ PS : Patches are sampled at a stride to reduce space and time complexity.
 <p float="left">
     <img title = "Saturation thresholded mask with bboxs" src="./images/saturation_thresholded_mask_with_bboxs.png" height=350/>
     <img title = "Base image with bboxs" src="./images/base_images_with_bboxs.png" height=350/>
-    <img title = "Base image with consecutive sample bboxs" src="./images/Tumor_001_with_actual_samples_for_heatmaps.png" height=350/>
+    <img title = "Base image with consecutive sample bboxs" src="./images/Tumor_001_with_actual_samples_for_heatmaps1.png" height=350/>
 </p>
 
 ```
@@ -103,7 +103,7 @@ PS : Below images are follows:
 ```
 [`slim/eval_image_classifier.py`](./slim/eval_image_classifier.py), [`utils/heatmaps/evaluate_raw_input_patches.py`](./utils/heatmaps/evaluate_raw_input_patches.py), [`utils/heatmaps/compute_heatmap_utils.py`](./utils/heatmaps/compute_heatmap_utils.py)
 <p float="left">
-    <img title = "Base image with consecutive sample bboxs" src="./images/Tumor_001_with_actual_samples_for_heatmaps.png" height=350/>
+    <img title = "Base image with consecutive sample bboxs" src="./images/Tumor_001_with_actual_samples_for_heatmaps1.png" height=350/>
     <img title = "Tumor_001_heatmap" src="./images/Tumor_001_heatmap.png" height=350/>
     <img title = "Tumor_001_heatmap_cleaned_1" src="./images/Tumor_001_heatmap_cleaned_1.png" height=350/>
     <img title = "Tumor_001_actual_mask" src="./images/Tumor_001_actual_mask.png" height=350/>
