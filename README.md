@@ -1,6 +1,6 @@
 # Classification of cancer metastases in whole slide images of lymph node with TensorFlow-Slim
 
-Note: This project is still a **work in progress**. I have recently moved from Java to Python.
+Note: This project is **no longer active**. It can be still used as a reference to build basic building blocks for any image classification project. When I created this, there were not many references available online. Pardon me for improper code structure, at that time I had recently moved from Java to Python.
 
 # Overview
 The [CAMELYON 16](https://camelyon16.grand-challenge.org/) is a "Grand Challenge" that was created for the [2016 International Symposium on Biomedical Imaging (ISBI 2016)](https://biomedicalimaging.org/2016/?page_id=416) conference. In this challenge, the goal is to develop algorithms for detection of micro- and macro-metastases in lymph node digitized images. This subject is highly relevant; lymph node metastases occur in most cancer types (e.g. breast, prostate, colon). Lymph nodes are small glands that filter lymph, the fluid that circulates through the lymphatic system. The lymph nodes in the underarm are the first place breast cancer is likely to spread.
